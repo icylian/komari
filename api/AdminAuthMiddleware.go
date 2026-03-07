@@ -14,8 +14,12 @@ func AdminAuthMiddleware() gin.HandlerFunc {
 		apiKey := c.GetHeader("Authorization")
 		if isApiKeyValid(apiKey) {
 			c.Set("api_key", apiKey)
-			c.Next()
-			return
+			uuid, err := accounts.GetAdminUUID() // 取管理员 UUID
+		    if err == nil {
+		        c.Set("uuid", uuid)
+		    }
+		    c.Next()
+		    return
 		}
 		// session-based authentication
 		session, err := c.Cookie("session_token")
