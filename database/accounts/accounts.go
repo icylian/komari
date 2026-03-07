@@ -181,3 +181,15 @@ func UpdateUser(uuid string, name, password, sso_type *string) error {
 	}
 	return nil
 }
+
+// GetFirstUserUUID 获取管理员（第一个用户）的 UUID
+// Komari 为单用户系统，仅存在一个用户
+func GetFirstUserUUID() (string, error) {
+	db := dbcore.GetDBInstance()
+	var user models.User
+	err := db.First(&user).Error
+	if err != nil {
+		return "", err
+	}
+	return user.UUID, nil
+}

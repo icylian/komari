@@ -16,6 +16,7 @@ import (
 func RequestTerminal(c *gin.Context) {
 	uuid := c.Param("uuid")
 	user_uuid, _ := c.Get("uuid")
+	userUUIDStr, _ := user_uuid.(string)
 	_, err := clients.GetClientByUUID(uuid)
 	if err != nil {
 		c.JSON(400, gin.H{
@@ -39,7 +40,7 @@ func RequestTerminal(c *gin.Context) {
 	// 新建一个终端连接
 	id := utils.GenerateRandomString(32)
 	session := &TerminalSession{
-		UserUUID:    user_uuid.(string),
+		UserUUID:    userUUIDStr,
 		UUID:        uuid,
 		Browser:     conn,
 		Agent:       nil,
