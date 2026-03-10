@@ -231,6 +231,11 @@ func MergeDatabase(db *gorm.DB) {
 		log.Println("[>0.1.4] Rebuilding LoadNotification table....")
 		db.Migrator().DropTable(&models.LoadNotification{})
 	}
+	// Drop duplicate index left by earlier MySQL/MariaDB deployments that had both
+	// `index` and `unique` on OfflineNotification.Client.
+	if db.Migrator().HasTable(&models.OfflineNotification{}) {
+		db.Exec("ALTER TABLE `offline_notifications` DROP INDEX `idx_offline_notifications_client`")
+	}
 	if !db.Migrator().HasTable(&models.OidcProvider{}) && db.Migrator().HasTable(&models.Config{}) {
 		log.Println("[>1.0.2] Merge OidcProvider table....")
 		var config struct {
