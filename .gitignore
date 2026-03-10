@@ -34,3 +34,7 @@ go.work.sum
 
 # build
 komari
+
+# docs
+/docs/TODO.md
+/docs/ARCHITECTURE.md

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /d/test/komari/.github/workflows -type f -name \"*.yml\" | xargs -I {} basename {})",
+      "Bash(find /d/test/komari -name \"*migration*\" -o -name \"*schema*\" -o -name \"*sql*\" 2>/dev/null | head -20)"
+    ]
+  }
+}

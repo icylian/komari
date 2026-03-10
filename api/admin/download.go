@@ -128,17 +128,10 @@ func DownloadBackup(c *gin.Context) {
 			api.RespondError(c, http.StatusInternalServerError, fmt.Sprintf("Error backing up sqlite database: %v", err))
 			return
 		}
-	} else if dbFilePath != "" {
-		// 非 sqlite 的情况：若配置了文件路径且存在，则直接复制（按用户需求仍然将名称固定为 komari.db）
-		if _, err := os.Stat(dbFilePath); err == nil {
-			if err := copyFile(dbFilePath, destDB); err != nil {
-				api.RespondError(c, http.StatusInternalServerError, fmt.Sprintf("Error copying database file: %v", err))
-				return
-			}
-		} else if !os.IsNotExist(err) {
-			api.RespondError(c, http.StatusInternalServerError, fmt.Sprintf("Error stating database file: %v", err))
-			return
-		}
+	} else {
+		// MariaDB/MySQL: database backup is not included in the zip.
+		// Use mysqldump or the komari migrate command to back up the database separately.
+		_ = dbFilePath
 	}
 
 	// 4) 开始写出 ZIP（以临时目录为根）

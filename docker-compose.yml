@@ -1,0 +1,35 @@
+services:
+  komari:
+    image: ghcr.io/komari-monitor/komari:latest
+    ports:
+      - "25774:25774"
+    environment:
+      KOMARI_DB_TYPE: mariadb
+      KOMARI_DB_HOST: db
+      KOMARI_DB_PORT: 3306
+      KOMARI_DB_USER: komari
+      KOMARI_DB_PASS: komari_password
+      KOMARI_DB_NAME: komari
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MARIADB_DATABASE: komari
+      MARIADB_USER: komari
+      MARIADB_PASSWORD: komari_password
+      MARIADB_RANDOM_ROOT_PASSWORD: "yes"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  mariadb_data:
