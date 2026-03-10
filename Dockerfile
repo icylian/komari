@@ -1,15 +1,36 @@
+# Stage 1: Build frontend
+FROM node:23-alpine AS frontend
+WORKDIR /web
+RUN apk add --no-cache git && \
+    git clone https://github.com/komari-monitor/komari-web .
+RUN npm install && npm run build
+
+# Stage 2: Build backend
+FROM golang:1.24-alpine AS builder
+WORKDIR /src
+RUN apk add --no-cache gcc musl-dev
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+# Copy frontend build output
+RUN mkdir -p public/defaultTheme/dist && \
+    rm -rf public/defaultTheme/dist/*
+COPY --from=frontend /web/dist/ public/defaultTheme/dist/
+COPY --from=frontend /web/komari-theme.json public/defaultTheme/
+RUN if [ -f /web/preview.png ]; then cp /web/preview.png public/defaultTheme/; fi
+
+RUN CGO_ENABLED=1 go build -trimpath -ldflags="-s -w" -o komari
+
+# Stage 3: Runtime
 FROM alpine:3.21
-
 WORKDIR /app
-
-# Docker buildx 会在构建时自动填充这些变量
-ARG TARGETOS
-ARG TARGETARCH
 
 RUN apk add --no-cache tzdata
 
-COPY komari-${TARGETOS}-${TARGETARCH} /app/komari
-
+COPY --from=builder /src/komari /app/komari
 RUN chmod +x /app/komari
 
 ENV GIN_MODE=release

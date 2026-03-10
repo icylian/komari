@@ -1,6 +1,6 @@
 services:
   komari:
-    image: ghcr.io/komari-monitor/komari:latest
+    build: .
     ports:
       - "25774:25774"
     environment:
